@@ -11,8 +11,9 @@ public class DBConnection {
         "jdbc:sqlserver://DESKTOP-DE73CAI:1433;" +
         "databaseName=HotelDB;" +
         "encrypt=true;" +
-        " trustServerCertificate=true;" +
-        "integratedSecurity=true;";
+        "trustServerCertificate=true;" +
+        "user=hotel_user;" +
+        "password=StrongPass123!;";
 
     public static Connection getConnection() throws SQLException {
         try {
