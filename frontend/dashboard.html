@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ocean View Hotel — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ════════ TOKENS ════════ */
+:root{
+  --bg:#f5ede0;--surface:#fdf8f2;--surface2:#faf3ea;
+  --border:#e8ddd0;--border2:#f0e8dc;
+  --ink:#1e1008;--ink-mid:#6e5e4e;--ink-mute:#9e8e7e;--ink-faint:#c8b8a8;
+  --amber:#c8763a;--amber-h:#a85c20;--amber-pale:rgba(200,118,58,.1);--amber-ring:rgba(200,118,58,.18);
+  --sidebar:#2c1a0e;--sidebar-hover:rgba(255,255,255,.06);
+  --red:#b84a1e;--red-pale:#fdf0e8;--red-ring:rgba(184,74,30,.2);
+  --green:#2a6e2a;--green-pale:#edf5ee;--green-ring:rgba(42,110,42,.2);
+  --warn:#8a6010;--warn-pale:#fef8ec;--warn-ring:rgba(138,96,16,.2);
+  --blue:#2a5a9e;--blue-pale:#eef4fb;--blue-ring:rgba(42,90,158,.2);
+  --shadow:0 2px 12px rgba(44,26,14,.08);
+  --tr:.22s ease;
+}
+[data-theme="dark"]{
+  --bg:#16100a;--surface:#1e1510;--surface2:#241a12;
+  --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.04);
+  --ink:#f0e8dc;--ink-mid:#b8a898;--ink-mute:#7a6a5a;--ink-faint:#3a2a1a;
+  --amber:#e8a060;--amber-h:#f0b878;--amber-pale:rgba(232,160,96,.12);--amber-ring:rgba(232,160,96,.2);
+  --sidebar:#100c06;--sidebar-hover:rgba(255,255,255,.05);
+  --red:#e07050;--red-pale:rgba(224,112,80,.1);--red-ring:rgba(224,112,80,.22);
+  --green:#5aaa5a;--green-pale:rgba(90,170,90,.1);--green-ring:rgba(90,170,90,.22);
+  --warn:#c8a040;--warn-pale:rgba(200,160,64,.1);--warn-ring:rgba(200,160,64,.22);
+  --blue:#6090d0;--blue-pale:rgba(96,144,208,.1);--blue-ring:rgba(96,144,208,.22);
+  --shadow:0 2px 12px rgba(0,0,0,.4);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Jost',sans-serif;transition:background var(--tr),color var(--tr);}
+body{background:var(--bg);color:var(--ink);}
+
+/* ════════ LAYOUT ════════ */
+.app{display:flex;height:100vh;}
+
+/* ════════ SIDEBAR ════════ */
+.sidebar{
+  width:258px;flex-shrink:0;
+  background:var(--sidebar);
+  display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;
+  position:relative;
+  transition:background var(--tr);
+}
+.sidebar::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 100% 50% at 50% 100%,rgba(180,80,20,.3) 0%,transparent 60%),
+    radial-gradient(ellipse 80% 40% at 80% 0%,rgba(120,50,10,.18) 0%,transparent 50%);
+}
+.sidebar::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(220,160,80,.5),transparent);}
+
+/* LOGO in sidebar */
+.sb-logo{
+  padding:28px 22px 22px;
+  border-bottom:1px solid rgba(255,255,255,.07);
+  position:relative;z-index:1;
+  animation:slideInLeft .5s ease both;
+}
+.sb-logo-inner{display:flex;align-items:center;gap:13px;}
+.sb-logo-mark{width:58px;height:58px;flex-shrink:0;}
+.sb-logo-mark svg{width:100%;height:100%;}
+.sb-logo-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:400;color:#fff;line-height:1.1;}
+.sb-logo-name em{font-style:italic;color:rgba(220,160,80,.8);display:block;font-size:.82em;margin-top:1px;}
+.sb-logo-sub{font-size:8.5px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:rgba(220,160,80,.32);margin-top:6px;}
+
+@keyframes slideInLeft{from{opacity:0;transform:translateX(-20px);}to{opacity:1;transform:translateX(0);}}
+
+/* user */
+.sb-user{
+  padding:16px 22px;border-bottom:1px solid rgba(255,255,255,.06);
+  display:flex;align-items:center;gap:12px;position:relative;z-index:1;
+  animation:slideInLeft .5s .1s ease both;opacity:0;
+}
+.sb-avatar{
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(220,160,80,.15);border:1.5px solid rgba(220,160,80,.3);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Playfair Display',serif;font-size:14px;font-weight:500;color:rgba(220,160,80,.9);flex-shrink:0;
+}
+.sb-user-info small{display:block;font-size:8.5px;font-weight:500;letter-spacing:1.8px;text-transform:uppercase;color:rgba(255,255,255,.28);}
+.sb-user-info p{font-size:13px;font-weight:400;color:rgba(255,255,255,.78);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:148px;margin-top:2px;}
+
+/* nav */
+.sb-nav{flex:1;padding:16px 12px;position:relative;z-index:1;}
+.nav-section{font-size:9px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,.2);padding:14px 12px 6px;}
+
+.nav-item{
+  display:flex;align-items:center;gap:11px;
+  padding:10px 12px;border-radius:7px;cursor:pointer;
+  font-size:13px;font-weight:400;color:rgba(255,255,255,.42);
+  margin-bottom:2px;position:relative;
+  transition:all .18s;
+  animation:slideInLeft .4s ease both;opacity:0;
+}
+.nav-item:nth-child(1){animation-delay:.15s;}
+.nav-item:nth-child(2){animation-delay:.2s;}
+.nav-item:nth-child(3){animation-delay:.25s;}
+.nav-item:nth-child(4){animation-delay:.3s;}
+.nav-item:nth-child(5){animation-delay:.35s;}
+.nav-item:nth-child(6){animation-delay:.4s;}
+
+.nav-item:hover{background:var(--sidebar-hover);color:rgba(255,255,255,.78);}
+.nav-item.active{background:rgba(220,160,80,.13);color:rgba(220,160,80,.95);}
+.nav-item.active::before{content:'';position:absolute;left:0;top:22%;bottom:22%;width:2.5px;border-radius:0 2px 2px 0;background:rgba(220,160,80,.8);}
+.nav-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+.nav-item.admin-only{display:none;}
+
+.sb-footer{padding:12px;border-top:1px solid rgba(255,255,255,.06);position:relative;z-index:1;}
+.nav-logout{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:400;color:rgba(220,100,80,.55);transition:all .15s;}
+.nav-logout:hover{background:rgba(220,100,80,.1);color:rgba(220,100,80,.9);}
+
+/* ════════ MAIN ════════ */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;transition:background var(--tr);}
+
+/* topbar */
+.topbar{
+  height:62px;flex-shrink:0;
+  background:var(--surface);border-bottom:1.5px solid var(--border);
+  display:flex;align-items:center;padding:0 28px;gap:14px;
+  transition:background var(--tr),border-color var(--tr);
+  animation:topbarIn .5s ease both;
+}
+@keyframes topbarIn{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+
+.topbar-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:400;color:var(--ink);flex:1;transition:color var(--tr);}
+.topbar-date{font-size:12px;font-weight:300;color:var(--ink-mute);transition:color var(--tr);}
+
+/* theme toggle in topbar */
+.theme-toggle{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--bg);border:1.5px solid var(--border);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+  transition:all .2s;
+}
+.theme-toggle:hover{transform:scale(1.1) rotate(12deg);}
+.icon-sun{display:none;}
+.icon-moon{display:block;}
+[data-theme="dark"] .icon-sun{display:block;}
+[data-theme="dark"] .icon-moon{display:none;}
+
+/* content */
+.content{flex:1;overflow-y:auto;padding:28px 30px;background:var(--bg);transition:background var(--tr);}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px;}
+
+/* ════════ PAGES ════════ */
+.page{display:none;}
+.page.active{display:block;animation:pgIn .28s ease both;}
+@keyframes pgIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+.page-header{margin-bottom:26px;}
+.page-header h2{font-family:'Playfair Display',serif;font-size:34px;font-weight:400;color:var(--ink);margin-bottom:5px;transition:color var(--tr);}
+.page-header p{font-size:13px;font-weight:300;color:var(--ink-mute);transition:color var(--tr);}
+
+/* ════════ STAT CARDS ════════ */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:26px;}
+
+.stat-card{
+  background:var(--surface);border:1.5px solid var(--border);border-radius:10px;
+  padding:22px 24px;position:relative;overflow:hidden;
+  transition:transform .22s,box-shadow .22s,border-color .22s,background var(--tr);
+  animation:cardIn .5s ease both;opacity:0;
+}
+.stat-card:nth-child(1){animation-delay:.1s;}
+.stat-card:nth-child(2){animation-delay:.18s;}
+.stat-card:nth-child(3){animation-delay:.26s;}
+.stat-card:nth-child(4){animation-delay:.34s;}
+@keyframes cardIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+
+.stat-card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(44,26,14,.1);border-color:var(--amber);}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;background:linear-gradient(90deg,var(--amber),rgba(240,180,100,.4));opacity:0;transition:opacity .22s;}
+.stat-card:hover::after{opacity:1;}
+
+.stat-label{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--ink-mute);margin-bottom:14px;transition:color var(--tr);}
+.stat-value{
+  font-family:'Playfair Display',serif;font-size:52px;font-weight:400;color:var(--amber);
+  line-height:1;transition:color var(--tr);
+  /* count-up animation via transform */
+  animation:valueIn .6s ease both;
+}
+@keyframes valueIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+
+/* ════════ PANELS ════════ */
+.panel{
+  background:var(--surface);border:1.5px solid var(--border);border-radius:10px;
+  margin-bottom:20px;overflow:hidden;
+  transition:background var(--tr),border-color var(--tr);
+  animation:panelIn .4s ease both;opacity:0;
+}
+.panel:nth-child(1){animation-delay:.1s;}
+.panel:nth-child(2){animation-delay:.2s;}
+@keyframes panelIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+.panel-head{padding:16px 22px;border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;background:var(--surface2);transition:background var(--tr),border-color var(--tr);}
+.panel-title{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-mute);transition:color var(--tr);}
+.panel-subtitle{font-size:12px;font-weight:300;color:var(--ink-faint);transition:color var(--tr);}
+.panel-body{padding:24px;}
+
+/* ════════ FORM ════════ */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 20px;}
+.form-grid.cols1{grid-template-columns:1fr;}
+.span2{grid-column:1/-1;}
+
+.field label{display:block;font-size:10px;font-weight:600;letter-spacing:1.8px;text-transform:uppercase;color:var(--ink-mute);margin-bottom:8px;transition:color var(--tr);}
+.field input,.field select{
+  width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:7px;
+  padding:10px 14px;font-family:'Jost',sans-serif;font-size:13px;font-weight:400;
+  color:var(--ink);outline:none;transition:all .2s;-webkit-appearance:none;
+}
+.field input::placeholder{color:var(--ink-faint);}
+.field input:focus,.field select:focus{border-color:var(--amber);box-shadow:0 0 0 3px var(--amber-pale);}
+.field select option{background:var(--surface);color:var(--ink);}
+
+/* ════════ BUTTONS ════════ */
+.btn{padding:9px 20px;border-radius:7px;border:none;font-family:'Jost',sans-serif;font-size:11px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;transition:all .18s;}
+.btn-primary{background:var(--ink);color:var(--bg);}
+.btn-primary:hover{background:var(--amber);transform:translateY(-1px);box-shadow:0 4px 16px var(--amber-ring);}
+.btn-ghost{background:var(--surface);color:var(--ink-mid);border:1.5px solid var(--border);}
+.btn-ghost:hover{background:var(--surface2);border-color:var(--amber);color:var(--ink);}
+.btn-danger{background:var(--red-pale);color:var(--red);border:1.5px solid var(--red-ring);}
+.btn-danger:hover{filter:brightness(.95);}
+.btn-sm{padding:5px 12px;font-size:10px;}
+.btn-row{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
+
+/* ════════ ALERTS ════════ */
+.alert{display:none;padding:11px 16px;border-radius:7px;font-size:13px;font-weight:400;margin-bottom:16px;line-height:1.5;transition:background var(--tr),color var(--tr);}
+.alert.error  {display:block;background:var(--red-pale);  color:var(--red);  border:1px solid var(--red-ring);}
+.alert.success{display:block;background:var(--green-pale);color:var(--green);border:1px solid var(--green-ring);}
+.alert.warn   {display:block;background:var(--warn-pale); color:var(--warn); border:1px solid var(--warn-ring);}
+
+/* ════════ TABLE ════════ */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead th{background:var(--surface2);padding:11px 16px;text-align:left;font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--ink-mute);border-bottom:1.5px solid var(--border);white-space:nowrap;transition:background var(--tr),color var(--tr),border-color var(--tr);}
+tbody tr{border-bottom:1px solid var(--border2);transition:background .12s;}
+tbody tr:last-child{border:none;}
+tbody tr:hover{background:var(--surface2);}
+tbody td{padding:12px 16px;font-size:13px;font-weight:300;color:var(--ink-mid);vertical-align:middle;white-space:nowrap;transition:color var(--tr);}
+tbody td:first-child{font-weight:500;color:var(--ink);}
+
+/* ════════ BADGES ════════ */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600;letter-spacing:.6px;text-transform:capitalize;}
+.badge-admin      {background:var(--amber-pale);color:var(--amber-h);border:1px solid var(--amber-ring);}
+.badge-staff      {background:var(--surface2);color:var(--ink-mute);border:1px solid var(--border);}
+.badge-active     {background:var(--green-pale);color:var(--green);border:1px solid var(--green-ring);}
+.badge-inactive   {background:var(--red-pale);color:var(--red);border:1px solid var(--red-ring);}
+.badge-confirmed  {background:var(--blue-pale);color:var(--blue);border:1px solid var(--blue-ring);}
+.badge-checked_in {background:var(--amber-pale);color:var(--amber-h);border:1px solid var(--amber-ring);}
+.badge-checked_out{background:var(--surface2);color:var(--ink-mute);border:1px solid var(--border);}
+.badge-cancelled  {background:var(--red-pale);color:var(--red);border:1px solid var(--red-ring);}
+
+/* ════════ RECEIPT ════════ */
+.receipt{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:32px;max-width:520px;position:relative;overflow:hidden;transition:background var(--tr),border-color var(--tr);}
+.receipt::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;background:linear-gradient(90deg,var(--amber),rgba(240,180,100,.4),var(--amber));}
+.receipt-header{text-align:center;padding-bottom:20px;margin-bottom:20px;border-bottom:1px solid var(--border);}
+.receipt-header h2{font-family:'Playfair Display',serif;font-size:26px;font-weight:400;color:var(--amber);}
+.receipt-header em{font-style:normal;font-size:12px;font-weight:300;color:var(--ink-mute);display:block;margin-top:4px;}
+.receipt-header small{font-size:9px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--ink-faint);display:block;margin-top:8px;}
+.receipt-row{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--border2);font-size:13px;}
+.receipt-row:last-child{border:none;}
+.receipt-row span:first-child{font-size:12px;color:var(--ink-mute);}
+.receipt-row span:last-child{color:var(--ink);font-weight:500;}
+.total-row{border-top:1.5px solid var(--border) !important;padding-top:14px !important;margin-top:6px;border-bottom:none !important;}
+.total-row span:first-child{color:var(--ink-mid) !important;font-weight:600 !important;}
+.total-row span:last-child{color:var(--amber) !important;font-size:22px !important;font-family:'Playfair Display',serif;font-weight:500 !important;}
+.receipt-foot{text-align:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--border2);font-size:11px;font-style:italic;font-weight:300;color:var(--ink-faint);}
+
+/* ════════ HELP CARDS ════════ */
+.help-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.help-card{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:24px;transition:all .22s;position:relative;overflow:hidden;animation:cardIn .5s ease both;opacity:0;}
+.help-card:nth-child(1){animation-delay:.1s;}.help-card:nth-child(2){animation-delay:.18s;}.help-card:nth-child(3){animation-delay:.26s;}.help-card:nth-child(4){animation-delay:.34s;}.help-card:nth-child(5){animation-delay:.42s;}.help-card:nth-child(6){animation-delay:.5s;}
+.help-card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(44,26,14,.1);border-color:var(--amber);}
+.help-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;background:linear-gradient(90deg,var(--amber),rgba(240,180,100,.4));opacity:0;transition:opacity .22s;}
+.help-card:hover::before{opacity:1;}
+.help-icon{width:44px;height:44px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;display:grid;place-items:center;font-size:20px;margin-bottom:14px;}
+.help-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:400;color:var(--ink);margin-bottom:8px;}
+.help-body{font-size:13px;font-weight:300;color:var(--ink-mute);line-height:1.7;}
+@media(max-width:700px){.help-grid{grid-template-columns:1fr;}}
+
+/* ════════ MODAL ════════ */
+.modal-overlay{position:fixed;inset:0;background:rgba(30,10,0,.45);display:flex;align-items:center;justify-content:center;z-index:500;padding:20px;opacity:0;pointer-events:none;transition:opacity .22s;backdrop-filter:blur(5px);}
+[data-theme="dark"] .modal-overlay{background:rgba(0,0,0,.65);}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:32px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;transform:translateY(16px) scale(.97);transition:transform .28s cubic-bezier(.34,1.56,.64,1),background var(--tr),border-color var(--tr);box-shadow:0 32px 64px rgba(30,10,0,.2);position:relative;}
+.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;background:linear-gradient(90deg,var(--amber),rgba(240,180,100,.4),var(--amber));border-radius:12px 12px 0 0;}
+[data-theme="dark"] .modal{box-shadow:0 32px 64px rgba(0,0,0,.7);}
+.modal-overlay.open .modal{transform:translateY(0) scale(1);}
+.modal-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:400;color:var(--ink);margin-bottom:22px;transition:color var(--tr);}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:24px;padding-top:18px;border-top:1px solid var(--border2);}
+
+/* ════════ PRINT ════════ */
+@media print{
+  .sidebar,.topbar,.btn-row,.no-print{display:none!important;}
+  body{background:white;}
+  .receipt{border:1px solid #ccc;background:white;box-shadow:none;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ════ SIDEBAR ════ -->
+  <aside class="sidebar">
+
+    <!-- LOGO -->
+    <div class="sb-logo">
+      <div class="sb-logo-inner">
+        <div class="sb-logo-mark">
+          <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjAwIj4KICA8ZGVmcz4KICAgIDxjbGlwUGF0aCBpZD0iY2lyY2xlLWNsaXAiPgogICAgICA8Y2lyY2xlIGN4PSIxMDAiIGN5PSIxMDAiIHI9Ijk1Ii8+CiAgICA8L2NsaXBQYXRoPgogICAgPHJhZGlhbEdyYWRpZW50IGlkPSJzdW4tZ3JhZCIgY3g9IjYwJSIgY3k9IjM1JSIgcj0iNDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI0ZGRDcwMCIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNGRjhDMDAiLz4KICAgIDwvcmFkaWFsR3JhZGllbnQ+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9InNreS1ncmFkIiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiM0QTkwRDkiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSI1MCUiIHN0b3AtY29sb3I9IiNGNEE0NjAiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjRkY2QjM1Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJzZWEtZ3JhZCIgeDE9IjAiIHkxPSIwIiB4Mj0iMCIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjMDA5OUNDIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzAwNjY5OSIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0ic2FuZC1ncmFkIiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNGNEQwM0YiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjRThCODRCIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KCiAgPCEtLSBPdXRlciByaW5nIC0tPgogIDxjaXJjbGUgY3g9IjEwMCIgY3k9IjEwMCIgcj0iOTgiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0M4QTA1MCIgc3Ryb2tlLXdpZHRoPSIxLjUiIG9wYWNpdHk9IjAuNiIvPgogIDxjaXJjbGUgY3g9IjEwMCIgY3k9IjEwMCIgcj0iOTUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0M4QTA1MCIgc3Ryb2tlLXdpZHRoPSIwLjUiIG9wYWNpdHk9IjAuMyIvPgoKICA8ZyBjbGlwLXBhdGg9InVybCgjY2lyY2xlLWNsaXApIj4KICAgIDwhLS0gU2t5IGJhY2tncm91bmQgLS0+CiAgICA8cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0idXJsKCNza3ktZ3JhZCkiLz4KCiAgICA8IS0tIFN1biAtLT4KICAgIDxjaXJjbGUgY3g9IjEwMCIgY3k9IjY4IiByPSIyMiIgZmlsbD0idXJsKCNzdW4tZ3JhZCkiIG9wYWNpdHk9IjAuOSIvPgogICAgPGNpcmNsZSBjeD0iMTAwIiBjeT0iNjgiIHI9IjI2IiBmaWxsPSJub25lIiBzdHJva2U9IiNGRkQ3MDAiIHN0cm9rZS13aWR0aD0iMSIgb3BhY2l0eT0iMC40Ii8+CiAgICA8Y2lyY2xlIGN4PSIxMDAiIGN5PSI2OCIgcj0iMzAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0ZGRDcwMCIgc3Ryb2tlLXdpZHRoPSIwLjUiIG9wYWNpdHk9IjAuMiIvPgoKICAgIDwhLS0gU3VuIHJheXMgLS0+CiAgICA8bGluZSB4MT0iMTAwIiB5MT0iMzUiIHgyPSIxMDAiIHkyPSIyOCIgc3Ryb2tlPSIjRkZENzAwIiBzdHJva2Utd2lkdGg9IjEuNSIgb3BhY2l0eT0iMC41IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICAgIDxsaW5lIHgxPSIxMjAiIHkxPSI0MiIgeDI9IjEyNSIgeTI9IjM2IiBzdHJva2U9IiNGRkQ3MDAiIHN0cm9rZS13aWR0aD0iMS41IiBvcGFjaXR5PSIwLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogICAgPGxpbmUgeDE9IjEzMyIgeTE9IjYwIiB4Mj0iMTQwIiB5Mj0iNTYiIHN0cm9rZT0iI0ZGRDcwMCIgc3Ryb2tlLXdpZHRoPSIxLjUiIG9wYWNpdHk9IjAuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgICA8bGluZSB4MT0iODAiIHkxPSI0MiIgeDI9Ijc1IiB5Mj0iMzYiIHN0cm9rZT0iI0ZGRDcwMCIgc3Ryb2tlLXdpZHRoPSIxLjUiIG9wYWNpdHk9IjAuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgICA8bGluZSB4MT0iNjciIHkxPSI2MCIgeDI9IjYwIiB5Mj0iNTYiIHN0cm9rZT0iI0ZGRDcwMCIgc3Ryb2tlLXdpZHRoPSIxLjUiIG9wYWNpdHk9IjAuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CgogICAgPCEtLSBEaXN0YW50IGJpcmRzIC0tPgogICAgPHBhdGggZD0iTTU1IDU1IFE1OCA1MiA2MSA1NSIgc3Ryb2tlPSIjMmMzZTUwIiBzdHJva2Utd2lkdGg9IjEiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogICAgPHBhdGggZD0iTTY1IDUwIFE2OCA0NyA3MSA1MCIgc3Ryb2tlPSIjMmMzZTUwIiBzdHJva2Utd2lkdGg9IjEiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogICAgPHBhdGggZD0iTTEzMCA1MiBRMTMzIDQ5IDEzNiA1MiIgc3Ryb2tlPSIjMmMzZTUwIiBzdHJva2Utd2lkdGg9IjEiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgoKICAgIDwhLS0gU2VhIC0tPgogICAgPHJlY3QgeD0iMCIgeT0iMTE4IiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjU1IiBmaWxsPSJ1cmwoI3NlYS1ncmFkKSIvPgogICAgPCEtLSBTZWEgc2hpbW1lciAtLT4KICAgIDxwYXRoIGQ9Ik0wIDEyMiBRMjUgMTE4IDUwIDEyMiBRNzUgMTI2IDEwMCAxMjIgUTEyNSAxMTggMTUwIDEyMiBRMTc1IDEyNiAyMDAgMTIyIiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4zKSIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICA8cGF0aCBkPSJNMCAxMzAgUTMwIDEyNiA2MCAxMzAgUTkwIDEzNCAxMjAgMTMwIFExNTAgMTI2IDE4MCAxMzAgUTE5MCAxMzIgMjAwIDEzMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMikiIHN0cm9rZS13aWR0aD0iMSIvPgogICAgPCEtLSBTdW4gcmVmbGVjdGlvbiBvbiBzZWEgLS0+CiAgICA8ZWxsaXBzZSBjeD0iMTAwIiBjeT0iMTI4IiByeD0iMTgiIHJ5PSI0IiBmaWxsPSJyZ2JhKDI1NSwyMDAsNTAsMC4zKSIvPgogICAgPGVsbGlwc2UgY3g9IjEwMCIgY3k9IjEzNCIgcng9IjEwIiByeT0iMiIgZmlsbD0icmdiYSgyNTUsMjAwLDUwLDAuMikiLz4KCiAgICA8IS0tIFNhbmQgYmVhY2ggLS0+CiAgICA8ZWxsaXBzZSBjeD0iMTAwIiBjeT0iMTg1IiByeD0iMTEwIiByeT0iNTUiIGZpbGw9InVybCgjc2FuZC1ncmFkKSIvPgoKICAgIDwhLS0gTGVmdCBQYWxtIHRyZWUgLS0+CiAgICA8cGF0aCBkPSJNMjggMTk1IFEzMCAxNjAgMzUgMTQwIFEzNiAxMzAgMzggMTIwIiBzdHJva2U9IiM1RDQwMzciIHN0cm9rZS13aWR0aD0iNSIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgICA8IS0tIExlZnQgcGFsbSBsZWF2ZXMgLS0+CiAgICA8cGF0aCBkPSJNMzggMTIwIFEyMCAxMDggOCAxMTIiIHN0cm9rZT0iIzJFN0QzMiIgc3Ryb2tlLXdpZHRoPSIzIiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICAgIDxwYXRoIGQ9Ik0zOCAxMjAgUTMwIDEwNSAyOCA5NSIgc3Ryb2tlPSIjMzg4RTNDIiBzdHJva2Utd2lkdGg9IjMiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogICAgPHBhdGggZD0iTTM4IDEyMCBRNDggMTA2IDU1IDEwOCIgc3Ryb2tlPSIjMkU3RDMyIiBzdHJva2Utd2lkdGg9IjMiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogICAgPHBhdGggZD0iTTM4IDEyMCBRNDUgMTEyIDUwIDExOCIgc3Ryb2tlPSIjNDNBMDQ3IiBzdHJva2Utd2lkdGg9IjIuNSIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgICA8IS0tIGNvY29udXRzIGxlZnQgLS0+CiAgICA8Y2lyY2xlIGN4PSIzNiIgY3k9IjEyMiIgcj0iMyIgZmlsbD0iIzhCNDUxMyIvPgogICAgPGNpcmNsZSBjeD0iNDAiIGN5PSIxMjQiIHI9IjMiIGZpbGw9IiM4QjQ1MTMiLz4KCiAgICA8IS0tIFJpZ2h0IFBhbG0gdHJlZSAtLT4KICAgIDxwYXRoIGQ9Ik0xNzIgMTk1IFExNjggMTU4IDE2MiAxMzggUTE2MCAxMjggMTU4IDExOCIgc3Ryb2tlPSIjNUQ0MDM3IiBzdHJva2Utd2lkdGg9IjUiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogICAgPCEtLSBSaWdodCBwYWxtIGxlYXZlcyAtLT4KICAgIDxwYXRoIGQ9Ik0xNTggMTE4IFExNzYgMTA2IDE4OCAxMTAiIHN0cm9rZT0iIzJFN0QzMiIgc3Ryb2tlLXdpZHRoPSIzIiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICAgIDxwYXRoIGQ9Ik0xNTggMTE4IFExNjYgMTAzIDE2OCA5MyIgc3Ryb2tlPSIjMzg4RTNDIiBzdHJva2Utd2lkdGg9IjMiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogICAgPHBhdGggZD0iTTE1OCAxMTggUTE0OCAxMDQgMTQxIDEwNiIgc3Ryb2tlPSIjMkU3RDMyIiBzdHJva2Utd2lkdGg9IjMiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogICAgPHBhdGggZD0iTTE1OCAxMTggUTE1MCAxMTAgMTQ1IDExNiIgc3Ryb2tlPSIjNDNBMDQ3IiBzdHJva2Utd2lkdGg9IjIuNSIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgICA8IS0tIGNvY29udXRzIHJpZ2h0IC0tPgogICAgPGNpcmNsZSBjeD0iMTYwIiBjeT0iMTIwIiByPSIzIiBmaWxsPSIjOEI0NTEzIi8+CiAgICA8Y2lyY2xlIGN4PSIxNTYiIGN5PSIxMjIiIHI9IjMiIGZpbGw9IiM4QjQ1MTMiLz4KCiAgICA8IS0tIENPVVBMRSBTSUxIT1VFVFRFUyBvbiBiZWFjaCAtLT4KICAgIDwhLS0gTWFuIC0tPgogICAgPGVsbGlwc2UgY3g9Ijg4IiBjeT0iMTM4IiByeD0iNSIgcnk9IjUiIGZpbGw9IiMyYzFhMGUiLz4KICAgIDxyZWN0IHg9Ijg0IiB5PSIxNDMiIHdpZHRoPSI5IiBoZWlnaHQ9IjE4IiByeD0iMiIgZmlsbD0iIzJjMWEwZSIvPgogICAgPHJlY3QgeD0iODQiIHk9IjE2MSIgd2lkdGg9IjQiIGhlaWdodD0iMTQiIHJ4PSIxIiBmaWxsPSIjMmMxYTBlIi8+CiAgICA8cmVjdCB4PSI4OSIgeT0iMTYxIiB3aWR0aD0iNCIgaGVpZ2h0PSIxNCIgcng9IjEiIGZpbGw9IiMyYzFhMGUiLz4KICAgIDwhLS0gTWFuIGFybSByZWFjaGluZyB0byB3b21hbiAtLT4KICAgIDxwYXRoIGQ9Ik05MyAxNTAgUTEwMCAxNDggMTA0IDE1MCIgc3Ryb2tlPSIjMmMxYTBlIiBzdHJva2Utd2lkdGg9IjIuNSIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CgogICAgPCEtLSBXb21hbiAtLT4KICAgIDxlbGxpcHNlIGN4PSIxMTAiIGN5PSIxMzgiIHJ4PSI0LjUiIHJ5PSI0LjUiIGZpbGw9IiMzZDI0MTUiLz4KICAgIDwhLS0gSGFpciAtLT4KICAgIDxwYXRoIGQ9Ik0xMDYgMTM2IFExMDggMTMwIDExMCAxMzQgUTExMiAxMzAgMTE0IDEzNiIgZmlsbD0iIzFhMGEwMCIvPgogICAgPHBhdGggZD0iTTExNCAxMzQgUTExOCAxMzYgMTE2IDE0MiIgc3Ryb2tlPSIjMWEwYTAwIiBzdHJva2Utd2lkdGg9IjIiIGZpbGw9Im5vbmUiLz4KICAgIDwhLS0gRHJlc3MgLS0+CiAgICA8cGF0aCBkPSJNMTA2IDE0MyBRMTA3IDE1NSAxMDQgMTY4IFExMTAgMTcwIDExNiAxNjggUTExMyAxNTUgMTE0IDE0MyBaIiBmaWxsPSIjYzg3NjNhIi8+CiAgICA8IS0tIFdvbWFuIGFybXMgLS0+CiAgICA8cGF0aCBkPSJNMTA2IDE1MCBRMTAwIDE0OCA5NiAxNTAiIHN0cm9rZT0iIzNkMjQxNSIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KCiAgICA8IS0tIEhlbGQgaGFuZHMgaW4gbWlkZGxlIC0tPgogICAgPGNpcmNsZSBjeD0iMTAwIiBjeT0iMTUwIiByPSIyLjUiIGZpbGw9IiMyYzFhMGUiLz4KCiAgICA8IS0tIEZsb3dlciBpbiB3b21hbiBoYWlyIC0tPgogICAgPGNpcmNsZSBjeD0iMTE0IiBjeT0iMTM1IiByPSIyLjUiIGZpbGw9IiNGRjY5QjQiLz4KICAgIDxjaXJjbGUgY3g9IjExNCIgY3k9IjEzNSIgcj0iMSIgZmlsbD0iI0ZGRDcwMCIvPgoKICAgIDwhLS0gU21hbGwgd2F2ZXMgYXQgZmVldCAtLT4KICAgIDxwYXRoIGQ9Ik03MCAxNzIgUTgwIDE2OSA5MCAxNzIgUTEwMCAxNzUgMTEwIDE3MiBRMTIwIDE2OSAxMzAgMTcyIiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoMCwxNTMsMjA0LDAuNSkiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KCiAgICA8IS0tIFN1YnRsZSB0ZXh0IGFyYyBhdCBib3R0b20gLS0+CiAgICA8cGF0aCBpZD0iYm90dG9tLWFyYyIgZD0iTSAzMCAxNzAgQSA4MCA4MCAwIDAgMCAxNzAgMTcwIiBmaWxsPSJub25lIi8+CiAgPC9nPgoKICA8IS0tIE91dGVyIGRlY29yYXRpdmUgcmluZyAtLT4KICA8Y2lyY2xlIGN4PSIxMDAiIGN5PSIxMDAiIHI9Ijk2IiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoMjAwLDE2MCw4MCwwLjUpIiBzdHJva2Utd2lkdGg9IjEuNSIvPgo8L3N2Zz4=" alt="Ocean View Hotel Logo" style="width:100%;height:100%;object-fit:contain;">
+        </div>
+        <div>
+          <div class="sb-logo-name">Ocean View <em>Hotel</em></div>
+          <div class="sb-logo-sub">Management Portal</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- USER -->
+    <div class="sb-user">
+      <div class="sb-avatar" id="avatar-initials">?</div>
+      <div class="sb-user-info">
+        <small id="user-role-label">Role</small>
+        <p id="user-name-label">Loading…</p>
+      </div>
+    </div>
+
+    <!-- NAV -->
+    <nav class="sb-nav">
+      <div class="nav-section">Overview</div>
+      <div class="nav-item active" data-page="dashboard" onclick="navigate('dashboard')"><span class="nav-icon">⊞</span> Dashboard</div>
+
+      <div class="nav-section">Management</div>
+      <div class="nav-item admin-only" data-page="staff" onclick="navigate('staff')"><span class="nav-icon">⊹</span> Staff Accounts</div>
+      <div class="nav-item" data-page="reservations" onclick="navigate('reservations')"><span class="nav-icon">⊟</span> Reservations</div>
+      <div class="nav-item" data-page="billing" onclick="navigate('billing')"><span class="nav-icon">⊜</span> Billing</div>
+
+      <div class="nav-section">Support</div>
+      <div class="nav-item" data-page="help" onclick="navigate('help')"><span class="nav-icon">⊘</span> Help</div>
+    </nav>
+
+    <div class="sb-footer">
+      <div class="nav-logout" onclick="doLogout()"><span class="nav-icon">↩</span> Sign Out</div>
+    </div>
+  </aside>
+
+  <!-- ════ MAIN ════ -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="page-title">Dashboard</div>
+      <div class="topbar-date" id="topbar-date"></div>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+        <span class="icon-moon">🌙</span>
+        <span class="icon-sun">☀️</span>
+      </button>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD PAGE -->
+      <div id="page-dashboard" class="page active">
+        <div class="page-header">
+          <h2>Good to see you 👋</h2>
+          <p>Here's a live overview of Ocean View Hotel today.</p>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-label">Total Reservations</div><div class="stat-value" id="stat-total">—</div></div>
+          <div class="stat-card"><div class="stat-label">Confirmed</div><div class="stat-value" id="stat-confirmed">—</div></div>
+          <div class="stat-card"><div class="stat-label">Checked In</div><div class="stat-value" id="stat-checkedin">—</div></div>
+          <div class="stat-card"><div class="stat-label">Staff Accounts</div><div class="stat-value" id="stat-staff">—</div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><span class="panel-title">Recent Reservations</span><span class="panel-subtitle">Latest 8 entries</span></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Res. No.</th><th>Guest</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Status</th></tr></thead>
+              <tbody id="dash-table"><tr><td colspan="6" style="text-align:center;padding:28px;color:var(--ink-faint)">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- STAFF -->
+      <div id="page-staff" class="page">
+        <div class="page-header"><h2>Staff Accounts</h2><p>Manage users and access levels — Admin only.</p></div>
+        <div class="panel no-print">
+          <div class="panel-head"><span class="panel-title">Create New Account</span></div>
+          <div class="panel-body">
+            <div id="staff-form-alert" class="alert"></div>
+            <div class="form-grid">
+              <div class="field"><label>Full Name</label><input id="s-name" type="text" placeholder="Full name"></div>
+              <div class="field"><label>Username</label><input id="s-user" type="text" placeholder="username"></div>
+              <div class="field"><label>Password</label><input id="s-pass" type="password" placeholder="Temporary password"></div>
+              <div class="field"><label>Email</label><input id="s-email" type="email" placeholder="email@hotel.com"></div>
+              <div class="field"><label>Role</label><select id="s-role"><option value="staff">Staff</option><option value="admin">Admin</option></select></div>
+            </div>
+            <div class="btn-row"><button class="btn btn-primary" onclick="createStaff()">Create Account</button></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><span class="panel-title">Staff Directory</span></div>
+          <div id="staff-table-alert" class="alert" style="margin:14px 22px 0;"></div>
+          <div class="table-wrap"><table><thead><tr><th>ID</th><th>Full Name</th><th>Username</th><th>Role</th><th>Email</th><th>Status</th><th>Actions</th></tr></thead><tbody id="staff-table"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- RESERVATIONS -->
+      <div id="page-reservations" class="page">
+        <div class="page-header"><h2>Reservations</h2><p>Create and manage all guest reservations.</p></div>
+        <div class="panel no-print">
+          <div class="panel-head"><span class="panel-title">New Reservation</span></div>
+          <div class="panel-body">
+            <div id="res-form-alert" class="alert"></div>
+            <div class="form-grid">
+              <div class="field"><label>Guest Name</label><input id="r-guest" type="text" placeholder="Full name"></div>
+              <div class="field"><label>Contact</label><input id="r-contact" type="text" placeholder="Phone or email"></div>
+              <div class="field"><label>Room Type</label><select id="r-room"><option value="">— Select Room —</option></select></div>
+              <div class="field"><label>Check-in</label><input id="r-checkin" type="date"></div>
+              <div class="field"><label>Check-out</label><input id="r-checkout" type="date"></div>
+            </div>
+            <div class="btn-row"><button class="btn btn-primary" onclick="addReservation()">Confirm Reservation</button></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><span class="panel-title">All Reservations</span></div>
+          <div id="res-table-alert" class="alert" style="margin:14px 22px 0;"></div>
+          <div class="table-wrap"><table><thead><tr><th>Res. No.</th><th>Guest</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Nights</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead><tbody id="res-table"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- BILLING -->
+      <div id="page-billing" class="page">
+        <div class="page-header"><h2>Billing</h2><p>Generate and print guest bills with 12% VAT.</p></div>
+        <div class="panel no-print">
+          <div class="panel-head"><span class="panel-title">Generate Bill</span></div>
+          <div class="panel-body">
+            <div id="billing-alert" class="alert"></div>
+            <div class="form-grid cols1" style="max-width:360px">
+              <div class="field"><label>Reservation Number</label><input id="b-resno" type="text" placeholder="RES-YYYYMMDD-001"></div>
+            </div>
+            <div class="btn-row">
+              <button class="btn btn-primary" onclick="calcBill()">Calculate Bill</button>
+              <button class="btn btn-ghost" id="print-btn" onclick="printBill()" style="display:none">🖨 Print Bill</button>
+            </div>
+          </div>
+        </div>
+        <div id="receipt-area" style="display:none;padding-bottom:24px;">
+          <div class="receipt">
+            <div class="receipt-header">
+              <h2>Ocean View Hotel</h2>
+              <em>Colombo, Sri Lanka</em>
+              <small>Official Receipt</small>
+            </div>
+            <div id="receipt-rows"></div>
+            <div class="receipt-foot">Thank you for staying with us ✦ Ocean View Hotel</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HELP -->
+      <div id="page-help" class="page">
+        <div class="page-header"><h2>Help &amp; Guidelines</h2><p>Everything you need to use the portal effectively.</p></div>
+        <div class="help-grid">
+          <div class="help-card"><div class="help-icon">📅</div><div class="help-title">Managing Reservations</div><div class="help-body">Create reservations with guest name, contact, room type, and dates. The system auto-generates a unique number. Edit status via the table.</div></div>
+          <div class="help-card"><div class="help-icon">🧾</div><div class="help-title">Billing &amp; Receipts</div><div class="help-body">Enter any valid reservation number for a full itemised receipt with 12% VAT calculated automatically. Use Print for a physical copy.</div></div>
+          <div class="help-card"><div class="help-icon">👥</div><div class="help-title">Staff Management</div><div class="help-body">Admins can create, edit, and deactivate staff accounts. Assign minimum required roles and deactivate when staff leave.</div></div>
+          <div class="help-card"><div class="help-icon">🔄</div><div class="help-title">Status Workflow</div><div class="help-body">Reservations: <strong>Confirmed → Checked In → Checked Out</strong>. Can be cancelled at any stage before checkout.</div></div>
+          <div class="help-card"><div class="help-icon">⬡</div><div class="help-title">Dashboard Overview</div><div class="help-body">Live snapshot of total, confirmed, and checked-in reservations plus active staff count and 8 recent entries.</div></div>
+          <div class="help-card"><div class="help-icon">🔒</div><div class="help-title">Security &amp; Sessions</div><div class="help-body">Always sign out when leaving a workstation. Sessions expire on window close. Report suspicious activity to your admin.</div></div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- Edit Staff Modal -->
+<div id="modal-staff" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-title">Edit Staff Account</div>
+    <div id="modal-staff-alert" class="alert"></div>
+    <input type="hidden" id="m-id">
+    <div class="form-grid">
+      <div class="field"><label>Full Name</label><input id="m-name" type="text"></div>
+      <div class="field"><label>Email</label><input id="m-email" type="email"></div>
+      <div class="field"><label>Role</label><select id="m-role"><option value="staff">Staff</option><option value="admin">Admin</option></select></div>
+      <div class="field"><label>Status</label><select id="m-status"><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
+      <div class="field span2"><label>New Password <span style="text-transform:none;letter-spacing:0;font-weight:300;font-size:10px;color:var(--ink-faint)">(leave blank to keep)</span></label><input id="m-pass" type="password" placeholder="New password"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-staff')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveStaff()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Logout Confirmation Modal -->
+<div id="modal-logout" class="modal-overlay">
+  <div class="modal" style="max-width:360px;text-align:center;">
+    <div style="font-size:48px;margin-bottom:12px;">&#128075;</div>
+    <div class="modal-title" style="text-align:center;margin-bottom:8px;">Signing Out</div>
+    <p style="font-size:14px;font-weight:300;color:var(--ink-mute);margin-bottom:28px;line-height:1.6;">
+      Are you sure you want to sign out,<br>
+      <strong id="logout-name" style="color:var(--ink);font-weight:600;"></strong>?
+    </p>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button class="btn btn-ghost" onclick="closeModal('modal-logout')" style="flex:1">Stay</button>
+      <button class="btn btn-danger" onclick="confirmLogout()" style="flex:1">Yes, Sign Out</button>
+    </div>
+  </div>
+</div>
+
+<!-- Update Reservation Modal -->
+<div id="modal-res" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-title">Update Reservation</div>
+    <input type="hidden" id="mr-resno">
+    <div class="field"><label>New Status</label>
+      <select id="mr-status">
+        <option value="confirmed">Confirmed</option><option value="checked_in">Checked In</option>
+        <option value="checked_out">Checked Out</option><option value="cancelled">Cancelled</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-res')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveResStatus()">Update</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API='http://localhost:8080/api';
+
+// ── THEME ──
+function toggleTheme(){const html=document.documentElement;const t=html.getAttribute('data-theme')==='dark'?'light':'dark';html.setAttribute('data-theme',t);localStorage.setItem('ovh-theme',t);}
+(()=>{const t=localStorage.getItem('ovh-theme');if(t)document.documentElement.setAttribute('data-theme',t);})();
+
+// ── SESSION ──
+const USER=JSON.parse(sessionStorage.getItem('user')||'null');
+if(!USER){
+  const base = window.location.href.substring(0, window.location.href.lastIndexOf('/')+1);
+  window.location.href = base + 'index.html';
+}
+document.getElementById('user-name-label').textContent=USER.fullName;
+document.getElementById('user-role-label').textContent=USER.role.toUpperCase();
+document.getElementById('avatar-initials').textContent=USER.fullName.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+if(USER.role==='admin')document.querySelectorAll('.admin-only').forEach(el=>el.style.display='flex');
+document.getElementById('topbar-date').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+// ── NAV ──
+function navigate(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  const el=document.querySelector(`[data-page="${page}"]`);if(el)el.classList.add('active');
+  const titles={dashboard:'Dashboard',staff:'Staff Accounts',reservations:'Reservations',billing:'Billing',help:'Help & Guidelines'};
+  document.getElementById('page-title').textContent=titles[page]||page;
+  if(page==='dashboard')loadDashboard();
+  if(page==='staff')loadStaff();
+  if(page==='reservations'){loadReservations();loadRates();}
+}
+
+// ── HELPERS ──
+function showAlert(id,type,msg){const el=document.getElementById(id);el.className='alert '+type;el.textContent=msg;setTimeout(()=>el.className='alert',4500);}
+function fmt(v){return'LKR '+parseFloat(v).toLocaleString('en-US',{minimumFractionDigits:2});}
+function badge(val,map){const cls=map[val]||'badge-staff';return`<span class="badge ${cls}">${val.replace('_',' ')}</span>`;}
+const SB={admin:'badge-admin',staff:'badge-staff',active:'badge-active',inactive:'badge-inactive',confirmed:'badge-confirmed',checked_in:'badge-checked_in',checked_out:'badge-checked_out',cancelled:'badge-cancelled'};
+async function api(path,opts={}){const r=await fetch(API+path,{headers:{'Content-Type':'application/json'},...opts});return r.json();}
+function esc(s){return(s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+
+// ── DASHBOARD ──
+async function loadDashboard(){
+  try{
+    const[rd,sd]=await Promise.all([api('/reservations'),api('/staff')]);
+    const res=rd.reservations||[],stf=sd.staff||[];
+    // animated count-up
+    countUp('stat-total',res.length);
+    countUp('stat-confirmed',res.filter(r=>r.status==='confirmed').length);
+    countUp('stat-checkedin',res.filter(r=>r.status==='checked_in').length);
+    countUp('stat-staff',stf.length);
+    const recent=res.slice(0,8);
+    document.getElementById('dash-table').innerHTML=recent.length
+      ?recent.map(r=>`<tr><td>${r.resNo}</td><td>${r.guestName}</td><td>${r.roomType}</td><td>${r.checkIn}</td><td>${r.checkOut}</td><td>${badge(r.status,SB)}</td></tr>`).join('')
+      :`<tr><td colspan="6" style="text-align:center;padding:28px;color:var(--ink-faint)">No reservations yet</td></tr>`;
+  }catch(e){console.error(e);}
+}
+
+function countUp(id,target){
+  const el=document.getElementById(id);
+  let cur=0;const step=Math.ceil(target/20);
+  const iv=setInterval(()=>{cur+=step;if(cur>=target){cur=target;clearInterval(iv);}el.textContent=cur;},40);
+}
+
+// ── STAFF ──
+async function loadStaff(){
+  const data=await api('/staff');
+  const rows=(data.staff||[]).map(s=>`<tr><td>${s.id}</td><td>${s.fullName}</td><td>${s.username}</td><td>${badge(s.role,SB)}</td><td>${s.email||'—'}</td><td>${badge(s.status,SB)}</td><td><button class="btn btn-ghost btn-sm" onclick="openEditStaff(${s.id},'${esc(s.fullName)}','${esc(s.email||'')}','${s.role}','${s.status}')">Edit</button><button class="btn btn-danger btn-sm" onclick="deleteStaff(${s.id},'${esc(s.fullName)}')" style="margin-left:4px">Delete</button></td></tr>`).join('');
+  document.getElementById('staff-table').innerHTML=rows||`<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--ink-faint)">No staff found</td></tr>`;
+}
+async function createStaff(){
+  const p={fullName:document.getElementById('s-name').value.trim(),username:document.getElementById('s-user').value.trim(),password:document.getElementById('s-pass').value.trim(),email:document.getElementById('s-email').value.trim(),role:document.getElementById('s-role').value};
+  if(!p.fullName||!p.username||!p.password)return showAlert('staff-form-alert','error','Full name, username and password are required.');
+  const d=await api('/staff',{method:'POST',body:JSON.stringify(p)});
+  if(d.success){showAlert('staff-form-alert','success',d.message);['s-name','s-user','s-pass','s-email'].forEach(id=>document.getElementById(id).value='');loadStaff();}
+  else showAlert('staff-form-alert','error',d.message);
+}
+function openEditStaff(id,name,email,role,status){
+  ['m-id','m-name','m-email','m-role','m-status'].forEach((f,i)=>document.getElementById(f).value=[id,name,email,role,status][i]);
+  document.getElementById('m-pass').value='';document.getElementById('modal-staff-alert').className='alert';openModal('modal-staff');
+}
+async function saveStaff(){
+  const id=document.getElementById('m-id').value;
+  const p={fullName:document.getElementById('m-name').value.trim(),email:document.getElementById('m-email').value.trim(),role:document.getElementById('m-role').value,status:document.getElementById('m-status').value,password:document.getElementById('m-pass').value.trim()};
+  const d=await api('/staff/'+id,{method:'PUT',body:JSON.stringify(p)});
+  if(d.success){showAlert('modal-staff-alert','success',d.message);setTimeout(()=>{closeModal('modal-staff');loadStaff();},800);}
+  else showAlert('modal-staff-alert','error',d.message);
+}
+async function deleteStaff(id,name){
+  if(!confirm(`Delete account for "${name}"?`))return;
+  const d=await api('/staff/'+id,{method:'DELETE'});
+  if(d.success){showAlert('staff-table-alert','success',d.message);loadStaff();}
+  else showAlert('staff-table-alert','error',d.message);
+}
+
+// ── RESERVATIONS ──
+async function loadRates(){
+  const d=await api('/rates');const sel=document.getElementById('r-room');
+  sel.innerHTML='<option value="">— Select Room —</option>';
+  (d.rates||[]).forEach(r=>{const o=document.createElement('option');o.value=r.roomType;o.textContent=`${r.roomType} — ${fmt(r.rate)}/night`;sel.appendChild(o);});
+}
+async function loadReservations(){
+  const d=await api('/reservations');
+  const rows=(d.reservations||[]).map(r=>`<tr><td>${r.resNo}</td><td>${r.guestName}</td><td>${r.roomType}</td><td>${r.checkIn}</td><td>${r.checkOut}</td><td>${r.nights}</td><td>${fmt(r.total)}</td><td>${badge(r.status,SB)}</td><td><button class="btn btn-ghost btn-sm" onclick="openResModal('${r.resNo}','${r.status}')">Edit</button><button class="btn btn-danger btn-sm" onclick="cancelReservation('${r.resNo}')" style="margin-left:4px">Cancel</button></td></tr>`).join('');
+  document.getElementById('res-table').innerHTML=rows||`<tr><td colspan="9" style="text-align:center;padding:28px;color:var(--ink-faint)">No reservations yet</td></tr>`;
+}
+async function addReservation(){
+  const p={guestName:document.getElementById('r-guest').value.trim(),guestContact:document.getElementById('r-contact').value.trim(),roomType:document.getElementById('r-room').value,checkIn:document.getElementById('r-checkin').value,checkOut:document.getElementById('r-checkout').value,createdBy:USER.id};
+  if(!p.guestName||!p.roomType||!p.checkIn||!p.checkOut)return showAlert('res-form-alert','error','All required fields must be filled.');
+  if(p.checkIn>=p.checkOut)return showAlert('res-form-alert','error','Check-out must be after check-in.');
+  const d=await api('/reservations',{method:'POST',body:JSON.stringify(p)});
+  if(d.success){showAlert('res-form-alert','success',`Reservation ${d.resNo} confirmed!`);['r-guest','r-contact','r-checkin','r-checkout'].forEach(id=>document.getElementById(id).value='');document.getElementById('r-room').value='';loadReservations();}
+  else showAlert('res-form-alert','warn',d.message);
+}
+function openResModal(resNo,status){document.getElementById('mr-resno').value=resNo;document.getElementById('mr-status').value=status;openModal('modal-res');}
+async function saveResStatus(){const resNo=document.getElementById('mr-resno').value,status=document.getElementById('mr-status').value;const d=await api('/reservations/'+resNo,{method:'PUT',body:JSON.stringify({status})});if(d.success){closeModal('modal-res');loadReservations();}}
+async function cancelReservation(resNo){if(!confirm(`Cancel reservation ${resNo}?`))return;const d=await api('/reservations/'+resNo,{method:'DELETE'});if(d.success){showAlert('res-table-alert','success','Reservation cancelled.');loadReservations();}else showAlert('res-table-alert','error',d.message);}
+
+// ── BILLING ──
+async function calcBill(){
+  const resNo=document.getElementById('b-resno').value.trim().toUpperCase();
+  if(!resNo)return showAlert('billing-alert','error','Enter a reservation number.');
+  const d=await api('/billing/'+resNo);
+  if(!d.success){showAlert('billing-alert','error',d.message);return;}
+  const rows=[['Reservation No.',d.resNo],['Guest Name',d.guestName],['Contact No.',d.guestContact||'—'],['Room Type',d.roomType],['Check-in',d.checkIn],['Check-out',d.checkOut],['No. of Nights',d.nights],['Rate / Night',fmt(d.ratePerNight)],['Subtotal',fmt(d.subtotal)],['VAT (12%)',fmt(d.tax)]];
+  document.getElementById('receipt-rows').innerHTML=rows.map(([k,v])=>`<div class="receipt-row"><span>${k}</span><span>${v}</span></div>`).join('')+`<div class="receipt-row total-row"><span>Total Amount Due</span><span>${fmt(d.total)}</span></div><div class="receipt-row"><span>Status</span><span>${d.status.replace('_',' ').toUpperCase()}</span></div>`;
+  const ra=document.getElementById('receipt-area');ra.style.display='block';ra.style.animation='pgIn .4s ease both';
+  document.getElementById('print-btn').style.display='';
+}
+async function printBill(){const resNo=document.getElementById('b-resno').value.trim().toUpperCase();await api('/billing/print/'+resNo,{method:'POST'});window.print();}
+
+// ── LOGOUT ──
+function confirmLogout(){
+  sessionStorage.removeItem('user');
+  const base = window.location.href.substring(0, window.location.href.lastIndexOf('/')+1);
+  window.location.href = base + 'index.html';
+}
+function doLogout(){
+  document.getElementById('logout-name').textContent = USER ? USER.fullName : 'Admin';
+  openModal('modal-logout');
+}
+
+loadDashboard();loadRates();
+</script>
+</body>
+</html>
