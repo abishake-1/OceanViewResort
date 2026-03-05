@@ -1,7 +1,10 @@
 package com.hotel;
 
+import com.hotel.handlers.AuthHandler;
+import com.hotel.handlers.BillingHandler;
+import com.hotel.handlers.ReservationHandler;
+import com.hotel.handlers.StaffHandler;
 import com.sun.net.httpserver.HttpServer;
-import handlers.*;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

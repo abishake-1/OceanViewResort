@@ -1,7 +1,7 @@
 package com.hotel.handlers;
 
 import com.sun.net.httpserver.HttpExchange;
-import util.JsonUtil;
+import com.hotel.util.JsonUtil;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

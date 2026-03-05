@@ -2,9 +2,9 @@ package com.hotel.handlers;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import db.DBConnection;
-import models.User;
-import util.JsonUtil;
+import com.hotel.db.DBConnection;
+import com.hotel.models.User;
+import com.hotel.util.JsonUtil;
 
 import java.io.IOException;
 import java.sql.*;
